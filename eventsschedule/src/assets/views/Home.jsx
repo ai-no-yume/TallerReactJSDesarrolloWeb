@@ -2,21 +2,24 @@ import { collection, getDocs, query, where, addDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { db } from '../services/firebase';
 import User from '../models/User';
+import EventSchedule from './EventSchedule'
 
 function Home() {
     const user = new User();
-    const [signinVisibility, setSigninVisibility] = useState(false);
-    const [signupVisibility, setSignupVisibility] = useState(true);
+    const [signinVisibility, setSigninVisibility] = useState(true);
+    const [signupVisibility, setSignupVisibility] = useState(false);
+    const [eventScheduleVisibility, setEventScheduleVisibility] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
     const handleSignup = async (event) => {
         event.preventDefault();
 
         const userCollectionRef = collection(db, 'users');
-        const documentRef = await addDoc(userCollectionRef, {
+        await addDoc(userCollectionRef, {
             identification: user.getIdentification(),
             password: user.getPassword(),
         });
+        // console.log("Sign up successful!"); -- testing purposes only
         // console.log(documentRef); -- testing purposes only
     };
 
@@ -32,9 +35,12 @@ function Home() {
         );
 
         const querySnapshot = await getDocs(q);
-        
+
         if (!querySnapshot.empty) {
-            console.log("Sign in successful!");
+            setSigninVisibility(false);
+            setSigninVisibility(false);
+            setEventScheduleVisibility(!eventScheduleVisibility);
+            // console.log("Sign in successful!");
         } else {
             setErrorMessage('Invalid credentials. Please try again.');
         }
@@ -48,6 +54,7 @@ function Home() {
 
     return (
         <div>
+
             {signinVisibility && (
                 <>
                     <h1>Sign in</h1>
@@ -69,27 +76,32 @@ function Home() {
                 </>
             )}
 
-            <div>
-                {signupVisibility && (
-                    <>
-                        <h1>Sign up</h1>
-                        <form onSubmit={handleSignup}>
-                            <div>
-                                <label>Identification</label>
-                                <input type="number" placeholder="Identification" onChange={(e) => user.setIdentification(e.target.value)} required />
-                            </div>
-                            <div>
-                                <label>Password</label>
-                                <input type="password" placeholder="Password" onChange={(e) => user.setPassword(e.target.value)} required />
-                            </div>
-                            <div>
-                                <button type="submit">Sign up</button>
-                            </div>
-                        </form>
-                        <button onClick={switchForm}>Already have an account?</button>
-                    </>
-                )}
-            </div>
+            {signupVisibility && (
+                <>
+                    <h1>Sign up</h1>
+                    <form onSubmit={handleSignup}>
+                        <div>
+                            <label>Identification</label>
+                            <input type="number" placeholder="Identification" onChange={(e) => user.setIdentification(e.target.value)} required />
+                        </div>
+                        <div>
+                            <label>Password</label>
+                            <input type="password" placeholder="Password" onChange={(e) => user.setPassword(e.target.value)} required />
+                        </div>
+                        <div>
+                            <button type="submit">Sign up</button>
+                        </div>
+                    </form>
+                    <button onClick={switchForm}>Already have an account?</button>
+                </>
+            )}
+
+            {eventScheduleVisibility && (
+                <>
+                    <EventSchedule />
+                </>
+            )}
+
         </div>
     );
 }
