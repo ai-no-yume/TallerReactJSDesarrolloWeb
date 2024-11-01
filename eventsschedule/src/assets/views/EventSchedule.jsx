@@ -7,7 +7,7 @@ function EventSchedule() {
     const eventInstance = new Event();
     const [eventFormVisibility, setEventFormVisibility] = useState(true);
     const [eventScheduleVisibility, setEventScheduleVisibility] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    // const [errorMessage, setErrorMessage] = useState('');
 
     const handleNewEvent = async (event) => {
         event.preventDefault();
@@ -33,7 +33,7 @@ function EventSchedule() {
     //     );
 
     //     const querySnapshot = await getDocs(q);
-        
+
     //     if (!querySnapshot.empty) {
     //         console.log("Sign in successful!");
     //     } else {
@@ -41,18 +41,18 @@ function EventSchedule() {
     //     }
     // };
 
-    // const switchForm = async () => {
-    //     setSigninVisibility(!signinVisibility);
-    //     setSignupVisibility(!signupVisibility);
-    //     setErrorMessage('');
-    // };
+    const switchMode = async () => {
+        setEventFormVisibility(!eventFormVisibility);
+        setEventScheduleVisibility(!eventScheduleVisibility)
+        // setErrorMessage('');
+    };
 
     return (
         <div>
             {eventFormVisibility && (
                 <>
                     <h1>Creating a new Event</h1>
-                    {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+                    {/* {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>} */}
                     <form onSubmit={handleNewEvent}>
                         <div>
                             <label>Date</label>
@@ -66,31 +66,18 @@ function EventSchedule() {
                             <button type="submit">Create Event</button>
                         </div>
                     </form>
-                    {/* <button onClick={switchForm}>Wanna see the events list?</button> */}
+                    <button onClick={switchMode}>Wanna see the events list?</button>
                 </>
             )}
 
-            {/* <div>
-                {signupVisibility && (
-                    <>
-                        <h1>Sign up</h1>
-                        <form onSubmit={handleSignup}>
-                            <div>
-                                <label>Identification</label>
-                                <input type="number" placeholder="Identification" onChange={(e) => event.setIdentification(e.target.value)} required />
-                            </div>
-                            <div>
-                                <label>Password</label>
-                                <input type="password" placeholder="Password" onChange={(e) => event.setPassword(e.target.value)} required />
-                            </div>
-                            <div>
-                                <button type="submit">Sign up</button>
-                            </div>
-                        </form>
-                        <button onClick={switchForm}>Already have an account?</button>
-                    </>
-                )}
-            </div> */}
+            {eventScheduleVisibility && (
+                <>
+                    <h1>Current Schedule</h1>
+
+                    <button onClick={switchMode}>Wanna add an event?</button>
+                </>
+            )}
+
         </div>
     );
 }
