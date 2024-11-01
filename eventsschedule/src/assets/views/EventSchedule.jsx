@@ -4,7 +4,7 @@ import { db } from '../services/firebase';
 import Event from '../models/Event';
 
 function EventSchedule() {
-    const event = new Event();
+    const eventInstance = new Event();
     const [eventFormVisibility, setEventFormVisibility] = useState(true);
     const [eventScheduleVisibility, setEventScheduleVisibility] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
@@ -15,8 +15,8 @@ function EventSchedule() {
         const eventCollectionRef = collection(db, 'events');
         await addDoc(eventCollectionRef, {
             identification: '1',
-            date: event.getDate(),
-            description: event.getDescription(),
+            date: eventInstance.getDate(),
+            description: eventInstance.getDescription(),
         });
         // console.log(documentRef); -- testing purposes only
     };
@@ -56,11 +56,11 @@ function EventSchedule() {
                     <form onSubmit={handleNewEvent}>
                         <div>
                             <label>Date</label>
-                            <input type="date" onChange={(e) => event.setDate(e.target.value)} required />
+                            <input type="date" onChange={(e) => eventInstance.setDate(e.target.value)} required />
                         </div>
                         <div>
                             <label>Description</label>
-                            <input type="text" placeholder="Event description" onChange={(e) => event.setDescription(e.target.value)} required />
+                            <input type="text" placeholder="Event description" onChange={(e) => eventInstance.setDescription(e.target.value)} required />
                         </div>
                         <div>
                             <button type="submit">Create Event</button>
