@@ -1,14 +1,17 @@
 import { collection, getDocs, addDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import { db } from '../services/firebase';
-import Event from '../models/Event';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 
 function EventSchedule() {
-    const [eventInstance, setEventInstance] = useState(new Event());
-    const [eventFormVisibility, setEventFormVisibility] = useState(true);
-    const [eventScheduleVisibility, setEventScheduleVisibility] = useState(false);
+    const [isEventFormVisible, setIsEventFormVisible] = useState(true);
+    const [isEventScheduleVisible, setIsEventScheduleVisible] = useState(false);
     const [events, setEvents] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
+    const [selectedDate, setSelectedDate] = useState(new Date());
+    const [eventDate, setEventDate] = useState('');
+    const [eventDescription, setEventDescription] = useState('');
 
     const fetchEvents = async () => {
         try {
@@ -22,32 +25,42 @@ function EventSchedule() {
     };
 
     useEffect(() => {
-        if (eventScheduleVisibility) {
+        if (isEventScheduleVisible) {
             fetchEvents();
         }
-    }, [eventScheduleVisibility]);
+    }, [isEventScheduleVisible]);
 
-    const handleNewEvent = async (event) => {
-        event.preventDefault();
+    const handleNewEvent = async (e) => {
+        e.preventDefault();
 
-        const eventCollectionRef = collection(db, 'events');
-        await addDoc(eventCollectionRef, {
-            identification: '1',
-            date: eventInstance.getDate(),
-            description: eventInstance.getDescription(),
-        });
-        setEventInstance(new Event());
+        try {
+            const eventCollectionRef = collection(db, 'events');
+            await addDoc(eventCollectionRef, {
+                identification: '1',
+                date: eventDate,
+                description: eventDescription,
+            });
+            setEventDate('');
+            setEventDescription('');
+            fetchEvents();
+        } catch (error) {
+            setErrorMessage('Error adding event: ' + error.message);
+        }
     };
 
     const switchMode = () => {
-        setEventFormVisibility(!eventFormVisibility);
-        setEventScheduleVisibility(!eventScheduleVisibility);
+        setIsEventFormVisible(!isEventFormVisible);
+        setIsEventScheduleVisible(!isEventScheduleVisible);
         setErrorMessage('');
     };
 
+    const filteredEvents = events.filter(event => {
+        return new Date(event.date).toDateString() === selectedDate.toDateString();
+    });
+
     return (
         <div>
-            {eventFormVisibility && (
+            {isEventFormVisible && (
                 <>
                     <h1>Creating a new Event</h1>
                     {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
@@ -56,10 +69,8 @@ function EventSchedule() {
                             <label>Date</label>
                             <input
                                 type="date"
-                                onChange={(e) => {
-                                    eventInstance.setDate(e.target.value);
-                                    setEventInstance({ ...eventInstance });
-                                }}
+                                value={eventDate}
+                                onChange={(e) => setEventDate(e.target.value)}
                                 required
                             />
                         </div>
@@ -68,10 +79,8 @@ function EventSchedule() {
                             <input
                                 type="text"
                                 placeholder="Event description"
-                                onChange={(e) => {
-                                    eventInstance.setDescription(e.target.value);
-                                    setEventInstance({ ...eventInstance });
-                                }}
+                                value={eventDescription}
+                                onChange={(e) => setEventDescription(e.target.value)}
                                 required
                             />
                         </div>
@@ -83,30 +92,24 @@ function EventSchedule() {
                 </>
             )}
 
-            {eventScheduleVisibility && (
+            {isEventScheduleVisible && (
                 <>
                     <h1>Current Schedule</h1>
-                    {events.length > 0 ? (
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Identification</th>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {events.map(event => (
-                                    <tr key={event.id}>
-                                        <td>{event.identification}</td>
-                                        <td>{event.date}</td>
-                                        <td>{event.description}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                    <Calendar
+                        onChange={setSelectedDate}
+                        value={selectedDate}
+                    />
+                    <h2>Events on {selectedDate.toDateString()}:</h2>
+                    {filteredEvents.length > 0 ? (
+                        <ul>
+                            {filteredEvents.map(event => (
+                                <li key={event.id}>
+                                    <strong>{event.description}</strong> on {new Date(event.date).toLocaleDateString()}
+                                </li>
+                            ))}
+                        </ul>
                     ) : (
-                        <p>No events found.</p>
+                        <p>No events found for this date.</p>
                     )}
                     <button onClick={switchMode}>Wanna add an event?</button>
                 </>

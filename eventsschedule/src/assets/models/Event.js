@@ -2,7 +2,7 @@ class Event {
     constructor(identification, date, description) {
         this.identification = identification;
         this.date = date;
-	this.description = description;
+	    this.description = description;
     }
 
     // Getters
